@@ -1,12 +1,14 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+// Importamos tu componente nuevo
+import { CompetitionListComponent } from './components/competition-list/competition-list'; 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  // Sacamos RouterOutlet y metemos tu lista
+  imports: [CompetitionListComponent], 
+  templateUrl: './app.html'
 })
 export class App {
-  protected readonly title = signal('FulboUCH');
+  title = 'FulboUCH';
 }
