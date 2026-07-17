@@ -5,6 +5,7 @@ import { PredictionService, Prediction } from '../../services/prediction.service
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { User } from '@angular/fire/auth';
+// Importaciones necesarias para el PDF
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -25,7 +26,6 @@ import autoTable from 'jspdf-autotable';
           </button>
         </div>
 
-        <!-- Formulario Crear -->
         <form (ngSubmit)="addPrediction()" class="flex flex-col sm:flex-row gap-4 mb-8 p-4 bg-zinc-900 rounded-xl border border-zinc-700">
           <div class="flex-1">
             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Local</label>
@@ -39,24 +39,23 @@ import autoTable from 'jspdf-autotable';
               class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
           </div>
           <div class="flex-1">
-            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Resultado (L - E - V)</label>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Resultado</label>
             <select [(ngModel)]="newPrediction.result" name="result" required
               class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
               <option value="" disabled selected>Selecciona</option>
-              <option value="L">Local (L)</option>
-              <option value="E">Empate (E)</option>
-              <option value="V">Visitante (V)</option>
+              <option value="L">Local</option>
+              <option value="E">Empate</option>
+              <option value="V">Visitante</option>
             </select>
           </div>
           <div class="flex items-end">
             <button type="submit" [disabled]="!isFormValid"
-              class="h-[42px] px-6 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-900 outline-none">
+              class="h-[42px] px-6 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-indigo-500 outline-none">
               Guardar
             </button>
           </div>
         </form>
 
-        <!-- Loading spinner -->
         <div *ngIf="isLoading" class="flex justify-center py-12">
           <svg class="w-8 h-8 text-indigo-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -64,11 +63,11 @@ import autoTable from 'jspdf-autotable';
           </svg>
         </div>
                  
-        <!-- Empty state -->
         <div *ngIf="!isLoading && predictions.length === 0" class="text-center py-12 bg-zinc-900 rounded-xl border border-zinc-800 border-dashed">
           <p class="text-zinc-400">Aún no has registrado ninguna predicción.</p>
         </div>
 
+        <!-- BOTÓN DE DESCARGAR PDF (Solo se muestra si hay predicciones) -->
         <div *ngIf="!isLoading && predictions.length > 0" class="flex justify-end mb-4">
           <button (click)="exportarTicketPDF()" class="flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-indigo-500/25 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -76,9 +75,8 @@ import autoTable from 'jspdf-autotable';
           </button>
         </div>
 
-        <!-- Lista -->
         <div *ngIf="!isLoading && predictions.length > 0" class="space-y-3">
-          <div *ngFor="let pred of predictions" class="group flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 rounded-xl transition-all">
+          <div *ngFor="let pred of predictions" class="group flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div class="flex-1">
               <div class="flex items-center space-x-3 text-lg font-bold text-white">
                 <span class="w-1/3 text-right">{{ pred.localTeam }}</span>
@@ -99,24 +97,14 @@ import autoTable from 'jspdf-autotable';
             </div>
 
             <div class="flex items-center space-x-2 ml-4">
-              <!-- Acciones de edición -->
               <ng-container *ngIf="editingId !== pred.id">
-                <button (click)="startEdit(pred)" class="p-2 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-lg transition-colors" title="Editar">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                </button>
+                <button (click)="startEdit(pred)" class="p-2 text-zinc-400 hover:text-indigo-400 rounded-lg">Editar</button>
               </ng-container>
               <ng-container *ngIf="editingId === pred.id">
-                <button (click)="saveEdit(pred)" class="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition-colors" title="Guardar">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </button>
-                <button (click)="cancelEdit()" class="p-2 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-700/50 rounded-lg transition-colors" title="Cancelar">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button (click)="saveEdit(pred)" class="p-2 text-green-400 rounded-lg">Guardar</button>
+                <button (click)="cancelEdit()" class="p-2 text-zinc-400 rounded-lg">Cancelar</button>
               </ng-container>
-              <!-- Acción Eliminar -->
-              <button (click)="deletePrediction(pred.id!)" class="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Eliminar">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
+              <button (click)="deletePrediction(pred.id!)" class="p-2 text-zinc-400 hover:text-red-400 rounded-lg">Eliminar</button>
             </div>
           </div>
         </div>
@@ -133,12 +121,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
   isLoading = true;
   private authSub: Subscription | undefined;
 
-  newPrediction = {
-    localTeam: '',
-    awayTeam: '',
-    result: ''
-  };
-
+  newPrediction = { localTeam: '', awayTeam: '', result: '' };
   editingId: string | null = null;
   editResultValue: string = '';
 
@@ -158,7 +141,6 @@ export class ProdeComponent implements OnInit, OnDestroy {
     });
   }
 
-  // BORRA EL METODO loadPredictions VIEJO Y PEGA ESTE:
   async loadPredictions(userId: string) {
     this.isLoading = true;
     try {
@@ -168,7 +150,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
-  }   
+  }
 
   async addPrediction() {
     if (!this.isFormValid || !this.user) return;
@@ -181,7 +163,6 @@ export class ProdeComponent implements OnInit, OnDestroy {
         createdAt: Date.now()
       });
       this.newPrediction = { localTeam: '', awayTeam: '', result: '' };
-      // Recargamos la lista después de guardar
       this.loadPredictions(this.user.uid);
     } catch (error) {
       console.error('Error adding prediction:', error);
@@ -213,7 +194,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
   }
 
   async deletePrediction(id: string) {
-    if (!id || !confirm('¿Estás seguro de eliminar esta predicción?')) return;
+    if (!id || !confirm('¿Estás seguro?')) return;
     try {
       await this.predictionService.deletePrediction(id);
       if (this.user) this.loadPredictions(this.user.uid);
@@ -235,6 +216,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
     }
   }
 
+  // MÉTODO PARA EXPORTAR EL PDF
   exportarTicketPDF() {
     if (!this.user || this.predictions.length === 0) return;
     const doc = new jsPDF();
