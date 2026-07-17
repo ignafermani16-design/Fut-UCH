@@ -25,7 +25,7 @@ import autoTable from 'jspdf-autotable';
           </button>
         </div>
 
-        <!-- Create Form -->
+        <!-- Formulario Crear -->
         <form (ngSubmit)="addPrediction()" class="flex flex-col sm:flex-row gap-4 mb-8 p-4 bg-zinc-900 rounded-xl border border-zinc-700">
           <div class="flex-1">
             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Local</label>
@@ -56,6 +56,7 @@ import autoTable from 'jspdf-autotable';
           </div>
         </form>
 
+        <!-- Loading spinner -->
         <div *ngIf="isLoading" class="flex justify-center py-12">
           <svg class="w-8 h-8 text-indigo-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -63,6 +64,7 @@ import autoTable from 'jspdf-autotable';
           </svg>
         </div>
                  
+        <!-- Empty state -->
         <div *ngIf="!isLoading && predictions.length === 0" class="text-center py-12 bg-zinc-900 rounded-xl border border-zinc-800 border-dashed">
           <p class="text-zinc-400">Aún no has registrado ninguna predicción.</p>
         </div>
@@ -74,7 +76,7 @@ import autoTable from 'jspdf-autotable';
           </button>
         </div>
 
-        <!-- Read List -->
+        <!-- Lista -->
         <div *ngIf="!isLoading && predictions.length > 0" class="space-y-3">
           <div *ngFor="let pred of predictions" class="group flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 rounded-xl transition-all">
             <div class="flex-1">
@@ -85,7 +87,6 @@ import autoTable from 'jspdf-autotable';
               </div>
               <div class="mt-2 text-sm text-zinc-400 flex justify-center space-x-2">
                 <span>Tu predicción:</span>
-                
                 <span *ngIf="editingId !== pred.id" class="font-bold text-indigo-400">{{ getResultText(pred.result) }}</span>
                 
                 <select *ngIf="editingId === pred.id" [(ngModel)]="editResultValue"
@@ -98,7 +99,7 @@ import autoTable from 'jspdf-autotable';
             </div>
 
             <div class="flex items-center space-x-2 ml-4">
-              <!-- Update / Save Actions -->
+              <!-- Acciones de edición -->
               <ng-container *ngIf="editingId !== pred.id">
                 <button (click)="startEdit(pred)" class="p-2 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-lg transition-colors" title="Editar">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -112,7 +113,7 @@ import autoTable from 'jspdf-autotable';
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </ng-container>
-              <!-- Delete Action -->
+              <!-- Acción Eliminar -->
               <button (click)="deletePrediction(pred.id!)" class="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Eliminar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
@@ -131,7 +132,6 @@ export class ProdeComponent implements OnInit, OnDestroy {
   predictions: Prediction[] = [];
   isLoading = true;
   private authSub: Subscription | undefined;
-  private predSub: Subscription | undefined;
 
   newPrediction = {
     localTeam: '',
@@ -158,20 +158,17 @@ export class ProdeComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadPredictions(userId: string) {
+  // BORRA EL METODO loadPredictions VIEJO Y PEGA ESTE:
+  async loadPredictions(userId: string) {
     this.isLoading = true;
-    this.predSub = this.predictionService.getUserPredictions(userId).subscribe({
-      next: (data) => {
-        // MUY IMPORTANTE: Clonamos el array con ...data antes de ordenar
-        this.predictions = [...data].sort((a, b) => b.createdAt - a.createdAt);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading predictions:', err);
-        this.isLoading = false;
-      }
-    });
-  }
+    try {
+      this.predictions = await this.predictionService.getUserPredictions(userId);
+    } catch (error) {
+      console.error('Error loading predictions:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }   
 
   async addPrediction() {
     if (!this.isFormValid || !this.user) return;
@@ -184,6 +181,8 @@ export class ProdeComponent implements OnInit, OnDestroy {
         createdAt: Date.now()
       });
       this.newPrediction = { localTeam: '', awayTeam: '', result: '' };
+      // Recargamos la lista después de guardar
+      this.loadPredictions(this.user.uid);
     } catch (error) {
       console.error('Error adding prediction:', error);
     }
@@ -207,6 +206,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
     try {
       await this.predictionService.updatePrediction(pred.id, this.editResultValue);
       this.cancelEdit();
+      if (this.user) this.loadPredictions(this.user.uid);
     } catch (error) {
       console.error('Error updating prediction:', error);
     }
@@ -216,6 +216,7 @@ export class ProdeComponent implements OnInit, OnDestroy {
     if (!id || !confirm('¿Estás seguro de eliminar esta predicción?')) return;
     try {
       await this.predictionService.deletePrediction(id);
+      if (this.user) this.loadPredictions(this.user.uid);
     } catch (error) {
       console.error('Error deleting prediction:', error);
     }
@@ -267,6 +268,5 @@ export class ProdeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.authSub?.unsubscribe();
-    this.predSub?.unsubscribe();
   }
 }

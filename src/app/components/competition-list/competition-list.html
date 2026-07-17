@@ -1,68 +1,124 @@
-<div class="container mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-6 text-zinc-800">Buscador de Ligas (FC Stats)</h1>
+<!-- Contenedor principal con tema oscuro premium -->
+<div class="min-h-screen bg-zinc-950 text-zinc-100 p-6 font-sans">
+  <div class="container mx-auto">
+    
+    <!-- Cabecera de la App -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">F</div>
+      <h1 class="text-4xl font-extrabold tracking-tight">Fut <span class="text-indigo-500">UCH</span></h1>
+    </div>
 
-  <div class="mb-8">
-    <input 
-      type="text" 
-      [formControl]="searchControl"
-      placeholder="Buscar liga o país (ej. Premier League, England)..." 
-      class="w-full md:w-1/2 p-3 border border-zinc-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-500"
-    >
-  </div>
+    <!-- FORMULARIO DE BÚSQUEDA Y FILTRADO -->
+    <form class="mb-10 bg-zinc-900 p-4 rounded-xl border border-zinc-800 shadow-inner flex flex-col md:flex-row gap-4" (submit)="$event.preventDefault()">
+      
+      <!-- Input de Texto -->
+      <div class="flex-1 relative">
+        <label class="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-2 block">Buscar Competición</label>
+        <input 
+          type="text" 
+          [formControl]="searchControl"
+          placeholder="Ej. Premier League, Champions..." 
+          class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-zinc-600"
+        >
+      </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Select de Tipo (Ligas vs Copas) -->
+      <div class="md:w-64">
+        <label class="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-2 block">Filtrar por Tipo</label>
+        <select 
+          [formControl]="typeControl"
+          class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer appearance-none"
+        >
+          <option value="ALL">Todas las competiciones</option>
+          <option value="LEAGUE">Solo Ligas (Domésticas)</option>
+          <option value="CUP">Solo Copas (Internacionales)</option>
+        </select>
+      </div>
+    </form>
 
-    @for (comp of filteredCompetitions; track comp.id) {
-      <div 
-        (click)="cargarEquipos(comp.code, comp.name)"
-        class="bg-white p-5 rounded-xl shadow-md border border-zinc-100 hover:shadow-lg transition-shadow cursor-pointer hover:border-zinc-400"
-      >
-        <div class="flex items-center gap-4 mb-4">
-          @if (comp.emblem) {
-            <img [src]="comp.emblem" alt="Logo de {{ comp.name }}" class="w-12 h-12 object-contain">
-          } @else {
-            <div class="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-zinc-500 text-xs">Sin logo</div>
-          }
-          <div>
-            <h2 class="text-xl font-semibold text-zinc-800">{{ comp.name }}</h2>
-            <p class="text-sm text-zinc-500">{{ comp.area.name }}</p>
+    <!-- Grilla de Ligas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (comp of filteredCompetitions; track comp.id) {
+        <div 
+          (click)="cargarEquipos(comp.code, comp.name)"
+          class="bg-zinc-900 p-6 rounded-2xl shadow-lg border border-zinc-800 hover:border-indigo-500 hover:shadow-indigo-500/20 hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+        >
+          <div class="flex items-start gap-4 mb-4">
+            <!-- Contenedor del logo -->
+            <div class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center p-2 group-hover:bg-zinc-100 transition-colors">
+              @if (comp.emblem) {
+                <img [src]="comp.emblem" alt="Logo de {{ comp.name }}" class="w-full h-full object-contain">
+              } @else {
+                <span class="text-zinc-500 text-xs">N/A</span>
+              }
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-zinc-100 group-hover:text-indigo-400 transition-colors">{{ comp.name }}</h2>
+              <p class="text-sm text-zinc-400 mt-1">{{ comp.area.name }}</p>
+            </div>
+          </div>
+
+          <!-- Etiquetas inferiores -->
+          <div class="mt-5 pt-4 border-t border-zinc-800 flex justify-between items-center">
+            <!-- Etiqueta dinámica: Muestra 'Copa' o 'Liga' según el tipo de torneo -->
+            <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold tracking-wide uppercase">
+              {{ comp.type === 'CUP' ? 'Copa' : 'Liga' }}
+            </span>
+            <span class="text-sm font-mono text-zinc-500 bg-zinc-950 px-2 py-1 rounded">{{ comp.code }}</span>
           </div>
         </div>
-
-        <div class="mt-4 pt-4 border-t border-zinc-100 flex justify-between text-sm text-zinc-600">
-          <span>Tipo: {{ comp.type }}</span>
-          <span>Código: {{ comp.code }}</span>
+      } @empty {
+        <div class="col-span-full text-center py-20 bg-zinc-900 border border-zinc-800 rounded-2xl">
+          <p class="text-zinc-400 text-lg">No se encontraron competiciones con ese filtro.</p>
         </div>
-      </div>
-    } @empty {
-      <div class="col-span-full text-center py-10 text-zinc-500">
-        No se encontraron ligas con ese nombre.
+      }
+    </div>
+
+    <!-- Modal de Equipos con Buscador Interno -->
+    @if (selectedTeams.length > 0) {
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Cabecera del Modal -->
+          <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50">
+            <div>
+              <h2 class="text-2xl font-bold text-zinc-100">{{ selectedLeagueName }}</h2>
+              <p class="text-sm text-indigo-400">Clubes participantes</p>
+            </div>
+            <button (click)="cerrarModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+              &times;
+            </button>
+          </div>
+
+          <!-- Buscador de Equipos -->
+          <div class="p-4 border-b border-zinc-800 bg-zinc-900">
+            <input 
+              type="text" 
+              [formControl]="teamSearchControl"
+              placeholder="Filtrar equipo por nombre (ej. Arsenal)..." 
+              class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder:text-zinc-600"
+            >
+          </div>
+
+          <!-- Lista de Equipos -->
+          <div class="p-6 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @for (team of filteredTeams; track team.id) {
+              <div class="flex flex-col items-center p-4 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-indigo-500/50 transition-colors text-center group">
+                <div class="w-16 h-16 mb-3 p-2 bg-zinc-900 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <img [src]="team.crest" alt="{{ team.name }}" class="w-full h-full object-contain">
+                </div>
+                <span class="text-sm font-medium text-zinc-300">{{ team.shortName || team.name }}</span>
+              </div>
+            } @empty {
+              <div class="col-span-full text-center py-10 text-zinc-500">
+                No hay equipos que coincidan con la búsqueda.
+              </div>
+            }
+          </div>
+
+        </div>
       </div>
     }
 
   </div>
-
-  @if (selectedTeams.length > 0) {
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-        
-        <div class="p-5 border-b border-zinc-200 flex justify-between items-center bg-zinc-50">
-          <h2 class="text-2xl font-bold text-zinc-800">Equipos de {{ selectedLeagueName }}</h2>
-          <button (click)="cerrarModal()" class="text-zinc-500 hover:text-red-500 font-bold text-xl px-2">
-            &times;
-          </button>
-        </div>
-
-        <div class="p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-4">
-          @for (team of selectedTeams; track team.id) {
-            <div class="flex flex-col items-center p-3 border border-zinc-100 rounded-lg text-center">
-              <img [src]="team.crest" alt="{{ team.name }}" class="w-10 h-10 mb-2 object-contain">
-              <span class="text-sm text-zinc-700 font-medium">{{ team.shortName || team.name }}</span>
-            </div>
-          }
-        </div>
-
-      </div>
-    </div>
-  }
 </div>
