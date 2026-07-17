@@ -1,1 +1,14 @@
-<app-competition-list></app-competition-list>
+<nav class="bg-zinc-950 border-b border-zinc-800 p-4">
+  <div class="container mx-auto flex items-center justify-between">
+    <a routerLink="/" class="text-xl font-bold text-indigo-500 tracking-wider">Fever Stats</a>
+    <div class="space-x-6 text-sm font-medium">
+      <a routerLink="/" class="text-zinc-400 hover:text-white transition-colors">Home</a>
+      <a routerLink="/mis-predicciones" class="text-zinc-400 hover:text-white transition-colors">Mis Predicciones</a>
+      <a routerLink="/login" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md transition-colors">Login</a>
+    </div>
+  </div>
+</nav>
+
+<main class="min-h-screen bg-zinc-900 text-zinc-100">
+  <router-outlet></router-outlet>
+</main>

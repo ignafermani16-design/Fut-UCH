@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
-// Importamos tu componente nuevo
-import { CompetitionListComponent } from './components/competition-list/competition-list'; 
+import { RouterOutlet, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  // Sacamos RouterOutlet y metemos tu lista
-  imports: [CompetitionListComponent], 
+  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.html'
 })
 export class App {
-  title = 'FulboUCH';
+  title = 'Fever Stats';
 }

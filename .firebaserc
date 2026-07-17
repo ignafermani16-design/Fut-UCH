@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "fut-uch"
-  }
+    "default": "fut-uch",
+    "FirebaseUCH": "fut-uch"
+  },
+  "targets": {},
+  "etags": {}
 }

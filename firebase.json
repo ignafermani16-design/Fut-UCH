@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "E:\\MisProyectos\\FulboUCH\\dist\\FulboUCH\\browser",
+    "public": "E:/MisProyectos/FulboUCH/dist/FulboUCH/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

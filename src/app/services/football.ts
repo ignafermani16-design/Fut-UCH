@@ -12,7 +12,6 @@ export class FootballService {
 
   constructor(private http: HttpClient) { }
 
-  // Método asíncrono para traer las ligas
   getCompetitions(): Observable<any> {
     const headers = new HttpHeaders({
       'X-Auth-Token': this.apiToken
@@ -20,11 +19,11 @@ export class FootballService {
     return this.http.get<any>(this.apiUrl, { headers });
   }
 
-  // ESTE MÉTODO FALTABA: Trae los equipos de una liga
   getTeams(competitionCode: string): Observable<any> {
     const headers = new HttpHeaders({
       'X-Auth-Token': this.apiToken
     });
+    // CORREGIDO: Faltaban las comillas invertidas (backticks) al principio
     const url = `https://cors-anywhere.herokuapp.com/https://api.football-data.org/v4/competitions/${competitionCode}/teams`;
     return this.http.get<any>(url, { headers });
   }
